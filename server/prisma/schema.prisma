@@ -22,9 +22,37 @@ model User {
   // Token for password reset
   resetToken       String?
   resetTokenExpiry DateTime?
+
+  section_swap Section_swap[]
 }
 
 enum Role {
   USER
   ADMIN
+}
+
+model Section_swap{
+  id Int @id @default(autoincrement())
+  currentCourseId Int
+  current_section Int 
+  desiredCourseId Int
+  desired_section Int[]
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  userId Int
+  user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+
+  currentCourse Course @relation(fields: [currentCourseId], references: [id], onDelete: Cascade,name: "CurrentSections")
+  desiredCourse Course @relation(fields: [desiredCourseId], references: [id], onDelete: Cascade,name:"DesiredSections")
+
+}
+
+model Course{
+  id Int @id @default(autoincrement())
+  code String 
+  title String?
+
+  desired_section_swap Section_swap[] @relation(name:"DesiredSections")
+  current_section_swap Section_swap[] @relation(name:"CurrentSections")
 }

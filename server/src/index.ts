@@ -1,5 +1,4 @@
 import app from "./app";
-import { generateAccessToken, generateRefreshToken } from "./utils/generateJWT";
 require("dotenv").config();
 
 const PORT = process.env.PORT || 8000;
