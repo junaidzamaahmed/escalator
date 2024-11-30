@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,11 +10,19 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import { LoginFormValues, loginSchema } from "@/lib/validations/auth"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { LoginFormValues, loginSchema } from "@/lib/validations/auth";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
   const form = useForm<LoginFormValues>({
@@ -23,10 +31,28 @@ export default function LoginPage() {
       email: "",
       password: "",
     },
-  })
+    errors: {
+      email: {
+        type: "required",
+        message: "Email is required",
+      },
+      password: {
+        type: "required",
+        message: "Password is required",
+      },
+    },
+  });
 
-  function onSubmit(values: LoginFormValues) {
-    console.log(values)
+  async function onSubmit(values: LoginFormValues) {
+    try {
+      const response = await fetch(API_URL + "/api/v1/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+      });
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -67,6 +93,14 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
+              <div className="text-sm text-right">
+                <Link
+                  href="/forgot-password"
+                  className="text-blue-500 hover:text-blue-700"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <Button type="submit" className="w-full">
                 Login
               </Button>
@@ -81,6 +115,5 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-
