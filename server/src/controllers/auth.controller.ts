@@ -21,6 +21,17 @@ export const login: RequestHandler = async (req: Request, res: Response) => {
   }
 };
 
+export const logout: RequestHandler = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie("refreshToken");
+    res
+      .status(200)
+      .json({ error: null, data: { message: "Logged out successfully" } });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred", data: null });
+  }
+};
+
 export const verifyUser: RequestHandler = async (
   req: Request,
   res: Response

@@ -4,6 +4,7 @@ import {
   resetPassword,
   refreshToken,
   verifyUser,
+  logout,
 } from "@/controllers/auth.controller";
 import { createUser } from "@/controllers/user.controller";
 import { auth } from "@/middlewares/auth";
@@ -17,5 +18,6 @@ authRouter.post("/refresh-token", refreshToken);
 authRouter.post("/reset-password?", resetPassword, login);
 authRouter.put("/forgot-password", forgotPassword);
 authRouter.put("/verify-user", auth(), verifyUser);
+authRouter.get("/logout", logout);
 
 export default authRouter;
