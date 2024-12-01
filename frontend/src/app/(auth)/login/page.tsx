@@ -63,7 +63,6 @@ export default function LoginPage() {
       }
       dispatch(toggleLoading());
     } catch (error) {
-      console.log(error);
       dispatch(toggleLoading());
     }
   }

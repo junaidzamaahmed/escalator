@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { Button } from "@/components/ui/button"
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -10,16 +10,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import Link from "next/link"
-import { useState } from "react"
-import { SignupFormValues, signupSchema } from "@/lib/validations/auth"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { SignupFormValues, signupSchema } from "@/lib/validations/auth";
+import { toggleLoading, userLogin } from "@/app/redux/slice";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -28,23 +35,57 @@ export default function SignupPage() {
       password: "",
       confirmPassword: "",
     },
-  })
+  });
 
-  function onSubmit(values: SignupFormValues) {
-    console.log({
-      ...values,
-    })
+  const router = useRouter();
+
+  const { isLoggedIn, isLoading } = useSelector((data: any) => data.userData);
+  const dispatch = useDispatch();
+
+  async function onSubmit(values: SignupFormValues) {
+    try {
+      dispatch(toggleLoading());
+
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/signup",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(values),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.status === 409) {
+        form.setError("email", {
+          type: "manual",
+          message: data.error,
+        });
+      } else if (response.ok) {
+        dispatch(userLogin(data.data.accessToken));
+      } else {
+        form.setError("email", {
+          type: "manual",
+          message: data.message,
+        });
+      }
+      dispatch(toggleLoading());
+    } catch (error) {
+      dispatch(toggleLoading());
+    }
   }
-
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-[400px]">
         <CardHeader>
           <CardTitle>Sign Up</CardTitle>
-          <CardDescription>
-            Create an account to get started
-          </CardDescription>
+          <CardDescription>Create an account to get started</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -101,7 +142,7 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 Sign Up
               </Button>
             </form>
@@ -115,6 +156,5 @@ export default function SignupPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
-

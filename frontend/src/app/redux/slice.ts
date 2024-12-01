@@ -15,6 +15,7 @@ export const refreshAccessToken = createAsyncThunk(
       return null;
     }
     if (decodedToken && decodedToken.exp! * 1000 > Date.now()) {
+      console.log(decodedToken);
       return null;
     }
     const response = await fetch(

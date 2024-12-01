@@ -31,7 +31,6 @@ export default function UserButton({ isLoggedIn }: { isLoggedIn: boolean }) {
       dispatch(userLogout());
       dispatch(toggleLoading());
     } catch (e) {
-      console.log(e);
       dispatch(toggleLoading());
     }
   };
