@@ -7,7 +7,6 @@ import {
   Settings,
   GraduationCapIcon as Graduation,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Sidebar,
   SidebarContent,
@@ -16,8 +15,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar";
+import Link from "next/link";
 
 const menuItems = [
   { icon: Home, label: "Home", href: "/" },
@@ -28,10 +27,8 @@ const menuItems = [
 ];
 
 export function SidebarComponent() {
-  const { toggleSidebar } = useSidebar();
-
   return (
-    <Sidebar className="border-r bg-gradient-to-b from-background to-secondary/10">
+    <Sidebar className="border-r">
       <SidebarHeader className="p-4">
         <h2 className="text-2xl font-bold">Escalator</h2>
       </SidebarHeader>
@@ -43,13 +40,13 @@ export function SidebarComponent() {
                 asChild
                 className="hover:bg-secondary/20 transition-colors"
               >
-                <a
+                <Link
                   href={item.href}
                   className="flex items-center space-x-2 p-2 rounded-md"
                 >
                   <item.icon className="h-5 w-5" />
                   <span>{item.label}</span>
-                </a>
+                </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}
@@ -60,13 +57,13 @@ export function SidebarComponent() {
           asChild
           className="hover:bg-secondary/20 transition-colors w-full"
         >
-          <a
+          <Link
             href="/settings"
             className="flex items-center space-x-2 p-2 rounded-md"
           >
             <Settings className="h-5 w-5" />
             <span>Settings</span>
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>

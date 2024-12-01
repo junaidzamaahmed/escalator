@@ -21,39 +21,57 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { LoginFormValues, loginSchema } from "@/lib/validations/auth";
+import { useRouter } from "next/navigation";
+import { toggleLoading, userLogin } from "@/app/redux/slice";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function LoginPage() {
+  const router = useRouter();
+
+  const { isLoggedIn, isLoading } = useSelector((data: any) => data.userData);
+  const dispatch = useDispatch();
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-    errors: {
-      email: {
-        type: "required",
-        message: "Email is required",
-      },
-      password: {
-        type: "required",
-        message: "Password is required",
-      },
-    },
   });
 
   async function onSubmit(values: LoginFormValues) {
     try {
+      dispatch(toggleLoading());
+
       const response = await fetch(API_URL + "/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
+        credentials: "include",
       });
+      const data = await response.json();
+      if (response.ok) {
+        dispatch(userLogin(data.data.accessToken));
+      } else {
+        form.setError("email", {
+          type: "manual",
+          message: data.message,
+        });
+      }
+      dispatch(toggleLoading());
     } catch (error) {
-      console.error(error);
+      console.log(error);
+      dispatch(toggleLoading());
     }
   }
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -101,7 +119,7 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 Login
               </Button>
             </form>
