@@ -4,16 +4,12 @@ import "./globals.css";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { ReduxProvider } from "./redux/provider";
 import dynamic from "next/dynamic";
+import { VerificationBanner } from "@/components/verificationBaner";
+import { Montserrat } from "next/font/google";
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -36,15 +32,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${montserrat.className} antialiased`}>
         <ReduxProvider>
           <SidebarProvider>
             <div className="flex h-screen bg-background w-screen">
               <SidebarComponent />
               <div className="flex-1 flex flex-col overflow-hidden">
                 <Navbar />
+                <VerificationBanner />
                 <main className="flex-1 overflow-y-auto p-6">{children}</main>
               </div>
             </div>

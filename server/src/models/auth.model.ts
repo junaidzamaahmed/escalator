@@ -5,7 +5,10 @@ import { generateAccessToken, generateRefreshToken } from "@/utils/generateJWT";
 import jwt from "jsonwebtoken";
 import { addMinutes } from "date-fns";
 import { Resend } from "resend";
-import { generatePasswordResetEmailHTML } from "@/utils/generateEmail";
+import {
+  generatePasswordResetEmailHTML,
+  generateVerificationEmailHTML,
+} from "@/utils/generateEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -105,6 +108,62 @@ export const authVerifyUser = async (
             },
           };
         }
+      }
+    }
+  } catch (error) {
+    return { error: "An error occurred", data: null };
+  }
+};
+
+export const authResendVerificationCode = async (email: string) => {
+  try {
+    const user = await db.user.findUnique({
+      where: {
+        email,
+      },
+      select: {
+        id: true,
+        email: true,
+        isVerified: true,
+      },
+    });
+
+    if (!user) {
+      return { error: "User not found", data: null };
+    } else {
+      if (user.isVerified) {
+        return {
+          error: null,
+          data: {
+            message: "User is already verified",
+          },
+        };
+      } else {
+        const verificationCode = generateToken().toString();
+        const updatedUser = await db.user.update({
+          where: {
+            email,
+          },
+          data: {
+            verificationCode,
+          },
+        });
+        const { data, error } = await resend.emails.send({
+          from: "Escalator <escalator@softyse.com>",
+          to: [email],
+          subject: "Email Verification Code",
+          html: generateVerificationEmailHTML({
+            name: updatedUser.name,
+            code: verificationCode,
+            link: `${process.env.CLIENT_URL}/`,
+          }),
+        });
+        return {
+          error: null,
+          data: {
+            message: "Verification code resent successfully",
+          },
+        };
       }
     }
   } catch (error) {

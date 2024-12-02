@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 export const auth =
-  (...requiredRoles: string[]) =>
+  (verification: boolean, ...requiredRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
@@ -24,6 +24,10 @@ export const auth =
       }
       req.user = verifiedToken;
       if (requiredRoles.length && !requiredRoles.includes(role)) {
+        res.status(403).json({ error: "Forbidden", data: null });
+        return;
+      }
+      if (verification && !verifiedToken.isVerified) {
         res.status(403).json({ error: "Forbidden", data: null });
         return;
       }

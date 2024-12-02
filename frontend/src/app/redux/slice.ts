@@ -8,14 +8,13 @@ const getFromLocalStorage = (key: string) => {
 
 export const refreshAccessToken = createAsyncThunk(
   "refreshAccessToken",
-  async () => {
+  async (force?: boolean) => {
     const accessToken = getFromLocalStorage("escalator_access_token");
     const decodedToken = jwtDecode(accessToken || "");
-    if (!accessToken || !decodedToken) {
+    if ((!accessToken || !decodedToken) && !force) {
       return null;
     }
-    if (decodedToken && decodedToken.exp! * 1000 > Date.now()) {
-      console.log(decodedToken);
+    if (decodedToken && decodedToken.exp! * 1000 > Date.now() && !force) {
       return null;
     }
     const response = await fetch(
@@ -39,6 +38,7 @@ const initialState = {
     : null,
   isLoggedIn: getFromLocalStorage("escalator_access_token") ? true : false,
   isLoading: false,
+  accessToken: getFromLocalStorage("escalator_access_token") || null,
 };
 
 const userSlice = createSlice({
