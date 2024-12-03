@@ -6,7 +6,7 @@ import {
   authResendVerificationCode,
   authResetPassword,
   authVerifyUser,
-} from "@/models/auth.model";
+} from "../models/auth.model";
 
 export const login: RequestHandler = async (req: Request, res: Response) => {
   const { email, password } = req.body;

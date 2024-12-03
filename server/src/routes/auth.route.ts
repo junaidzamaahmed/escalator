@@ -6,9 +6,9 @@ import {
   verifyUser,
   logout,
   resendVerificationCode,
-} from "@/controllers/auth.controller";
-import { createUser } from "@/controllers/user.controller";
-import { auth } from "@/middlewares/auth";
+} from "../controllers/auth.controller";
+import { createUser } from "../controllers/user.controller";
+import { auth } from "../middlewares/auth";
 import { Router } from "express";
 
 const authRouter = Router();

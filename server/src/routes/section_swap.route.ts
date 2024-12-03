@@ -3,8 +3,8 @@ import {
   getsection_swap,
   getsection_swapbyID,
   updatesection_swap,
-} from "@/controllers/section_swap.controller";
-import { auth } from "@/middlewares/auth";
+} from "../controllers/section_swap.controller";
+import { auth } from "../middlewares/auth";
 import { Role } from "@prisma/client";
 import { Router } from "express";
 

@@ -3,7 +3,7 @@ import {
   section_swapbyID,
   section_swapDelete,
   section_swapUpdate,
-} from "@/models/section_swap.model";
+} from "../models/section_swap.model";
 import { Course, Section_swap, User } from "@prisma/client";
 import { Request, RequestHandler, Response } from "express";
 

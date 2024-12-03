@@ -1,9 +1,9 @@
-import { db } from "@/utils/db";
+import { db } from "../utils/db";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import bycript from "bcrypt";
 import { Role } from "@prisma/client";
 import { Resend } from "resend";
-import { generateVerificationEmailHTML } from "@/utils/generateEmail";
+import { generateVerificationEmailHTML } from "../utils/generateEmail";
 
 export const getUsers: RequestHandler = async (req: Request, res: Response) => {
   try {

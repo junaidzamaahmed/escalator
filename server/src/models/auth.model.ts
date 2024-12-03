@@ -1,14 +1,17 @@
 import bycript from "bcrypt";
-import { db } from "@/utils/db";
+import { db } from "../utils/db";
 import { Request, Response } from "express";
-import { generateAccessToken, generateRefreshToken } from "@/utils/generateJWT";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateJWT";
 import jwt from "jsonwebtoken";
 import { addMinutes } from "date-fns";
 import { Resend } from "resend";
 import {
   generatePasswordResetEmailHTML,
   generateVerificationEmailHTML,
-} from "@/utils/generateEmail";
+} from "../utils/generateEmail";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
