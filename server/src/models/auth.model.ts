@@ -44,10 +44,12 @@ export const authLogin = async (
         const { password, ...userWithoutPassword } = user;
         const accessToken = generateAccessToken(userWithoutPassword);
         const refreshToken = generateRefreshToken(userWithoutPassword);
+        console.log(accessToken, refreshToken);
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
           secure: process.env.NODE_ENV === "production" ? true : false,
         });
+        console.log("After cookie");
         return {
           error: null,
           data: {
