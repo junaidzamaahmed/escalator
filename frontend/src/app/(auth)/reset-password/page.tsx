@@ -24,25 +24,72 @@ import {
   ResetPasswordFormValues,
   resetPasswordSchema,
 } from "@/lib/validations/auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleLoading, userLogin } from "@/app/redux/slice";
 
 export default function ResetPasswordPage() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const email = searchParams.get("email");
   const form = useForm<ResetPasswordFormValues>({
     resolver: zodResolver(resetPasswordSchema),
     defaultValues: {
-      email: "",
+      email: email || "",
       verificationCode: "",
       newPassword: "",
       confirmPassword: "",
     },
   });
+  const dispatch = useDispatch();
+  const { isLoggedIn } = useSelector((data: any) => data.userData);
 
-  function onSubmit(values: ResetPasswordFormValues) {
-    console.log(values);
-    // Here you would typically send a request to your API to handle the password reset
-    alert(
-      "Password reset successful. You can now log in with your new password."
-    );
+  async function onSubmit(values: ResetPasswordFormValues) {
+    dispatch(toggleLoading());
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (response.ok) {
+        dispatch(userLogin(data.data.accessToken));
+        setIsDialogOpen(true);
+      } else {
+        form.setError("verificationCode", {
+          type: "manual",
+          message: data.error,
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+    dispatch(toggleLoading());
   }
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      router.push("/");
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -133,6 +180,25 @@ export default function ResetPasswordPage() {
           </div>
         </CardContent>
       </Card>
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Password Reset Successful</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are now logged in and will be redirected to the home page.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setIsDialogOpen(false);
+              }}
+            >
+              OK
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

@@ -16,7 +16,7 @@ const authRouter = Router();
 authRouter.post("/login", login);
 authRouter.post("/signup", createUser, login);
 authRouter.post("/refresh-token", refreshToken);
-authRouter.post("/reset-password?", resetPassword, login);
+authRouter.post("/reset-password", resetPassword, login);
 authRouter.put("/forgot-password", forgotPassword);
 authRouter.put("/verify-user", auth(false), verifyUser);
 authRouter.get(

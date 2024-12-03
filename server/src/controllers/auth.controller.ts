@@ -10,6 +10,7 @@ import {
 
 export const login: RequestHandler = async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  console.log(email, password);
   try {
     const data: {
       error: string | null;
@@ -103,11 +104,10 @@ export const resetPassword: RequestHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { resetToken } = req.query;
-  const { email, password } = req.body;
+  const { email, newPassword, verificationCode } = req.body;
   try {
     const data: { error: string | null; data: { message: string } | null } =
-      await authResetPassword(resetToken as string, email, password);
+      await authResetPassword(verificationCode, email, newPassword, req);
     if (data.error) {
       res.status(401).json(data);
     } else {

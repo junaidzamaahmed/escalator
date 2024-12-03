@@ -1,6 +1,6 @@
 import bycript from "bcrypt";
 import { db } from "@/utils/db";
-import { Response } from "express";
+import { Request, Response } from "express";
 import { generateAccessToken, generateRefreshToken } from "@/utils/generateJWT";
 import jwt from "jsonwebtoken";
 import { addMinutes } from "date-fns";
@@ -244,7 +244,6 @@ export const authForgotPassword = async (email: string) => {
     } else {
       const resetToken = generateToken().toString();
       const resetTokenExpiry = addMinutes(new Date(), 1440);
-      const currentTime = new Date();
 
       const updatedUser = await db.user.update({
         where: {
@@ -264,7 +263,7 @@ export const authForgotPassword = async (email: string) => {
         to: [email],
         subject: "Password Reset Request",
         html: generatePasswordResetEmailHTML({
-          name: updatedUser.name,
+          name: updatedUser.name || "",
           code: resetToken,
           link: `${process.env.CLIENT_URL}/${email}/reset-password/${resetToken}`,
         }),
@@ -273,9 +272,6 @@ export const authForgotPassword = async (email: string) => {
       return {
         error: null,
         data: {
-          resetToken,
-          resetTokenExpiry,
-          currentTime,
           message:
             "A password reset email has been sent. It will expire within 24 hours.",
         },
@@ -289,7 +285,8 @@ export const authForgotPassword = async (email: string) => {
 export const authResetPassword = async (
   resetToken: string,
   email: string,
-  password: string
+  password: string,
+  req: Request
 ) => {
   try {
     const user = await db.user.findUnique({
@@ -302,7 +299,6 @@ export const authResetPassword = async (
         resetTokenExpiry: true,
       },
     });
-
     if (!user) {
       return {
         error: "Invalid token or token has expired",
@@ -329,6 +325,7 @@ export const authResetPassword = async (
             email: true,
           },
         });
+        req.body = { email, password };
         return {
           error: null,
           data: {

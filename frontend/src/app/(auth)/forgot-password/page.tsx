@@ -34,8 +34,11 @@ import {
   ForgotPasswordFormValues,
   forgotPasswordSchema,
 } from "@/lib/validations/auth";
+import { useRouter } from "next/navigation";
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
+
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
@@ -44,9 +47,22 @@ export default function ForgotPasswordPage() {
     },
   });
 
-  function onSubmit(values: ForgotPasswordFormValues) {
-    console.log(values);
-    // Here you would typically send a request to your API to handle the password reset
+  async function onSubmit(values: ForgotPasswordFormValues) {
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/forgot-password",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+        }
+      );
+    } catch (error) {
+      console.log(error);
+    }
+
     setIsDialogOpen(true);
   }
 
@@ -95,13 +111,16 @@ export default function ForgotPasswordPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Verification Code Sent</AlertDialogTitle>
             <AlertDialogDescription>
-              If an account with that email exists, we've sent a verification
-              code. Please check your email and use the code to reset your
-              password.
+              Please check your email and use the code to reset your password.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogAction onClick={() => setIsDialogOpen(false)}>
+            <AlertDialogAction
+              onClick={() => {
+                setIsDialogOpen(false);
+                router.push(`/reset-password?email=${form.getValues().email}`);
+              }}
+            >
               OK
             </AlertDialogAction>
           </AlertDialogFooter>
