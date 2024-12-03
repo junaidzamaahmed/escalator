@@ -37,7 +37,9 @@ export const authLogin = async (
     if (!user) {
       return { error: "Invalid credentials", data: null };
     } else {
+      console.log("Before passwordMatch");
       const passwordMatch = await bycript.compare(password, user.password);
+      console.log("after passwordMatch" + passwordMatch);
       if (passwordMatch) {
         const { password, ...userWithoutPassword } = user;
         const accessToken = generateAccessToken(userWithoutPassword);
