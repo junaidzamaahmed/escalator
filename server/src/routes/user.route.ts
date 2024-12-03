@@ -3,8 +3,8 @@ import {
   getUserById,
   getUsers,
   updateUser,
-} from "@/controllers/user.controller";
-import { auth } from "@/middlewares/auth";
+} from "../controllers/user.controller";
+import { auth } from "../middlewares/auth";
 import { Role } from "@prisma/client";
 import { Router } from "express";
 
