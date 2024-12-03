@@ -17,6 +17,7 @@ export const authLogin = async (
   password: string,
   res: Response
 ) => {
+  console.log(email, password);
   try {
     const user = await db.user.findUnique({
       where: {
