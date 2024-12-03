@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Book, Users, FileText, Shuffle, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 const features = [
   {
@@ -76,8 +77,8 @@ export default function Home() {
           </p>
         </div>
         <div className="flex justify-center space-x-4">
-          <Button size="lg" variant="secondary">
-            Sign Up
+          <Button size="lg" variant="secondary" asChild>
+            <Link href={"/signup"}>Sign Up</Link>
           </Button>
           <Button size="lg" variant="default">
             Learn More

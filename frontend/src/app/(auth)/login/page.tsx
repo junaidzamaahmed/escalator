@@ -58,7 +58,7 @@ export default function LoginPage() {
       } else {
         form.setError("email", {
           type: "manual",
-          message: data.message,
+          message: data.error,
         });
       }
       dispatch(toggleLoading());
