@@ -6,6 +6,7 @@ import { ReduxProvider } from "./redux/provider";
 import dynamic from "next/dynamic";
 import { VerificationBanner } from "@/components/verificationBaner";
 import { Montserrat } from "next/font/google";
+import { Suspense } from "react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -38,9 +39,11 @@ export default function RootLayout({
             <div className="flex h-screen bg-background w-screen">
               <SidebarComponent />
               <div className="flex-1 flex flex-col overflow-hidden">
-                <Navbar />
-                <VerificationBanner />
-                <main className="flex-1 overflow-y-auto p-6">{children}</main>
+                <Suspense>
+                  <Navbar />
+                  <VerificationBanner />
+                  <main className="flex-1 overflow-y-auto p-6">{children}</main>
+                </Suspense>
               </div>
             </div>
           </SidebarProvider>
