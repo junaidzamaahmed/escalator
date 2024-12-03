@@ -47,7 +47,7 @@ export const authLogin = async (
         console.log(accessToken, refreshToken);
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production" ? true : false,
+          secure: true,
         });
         console.log("After cookie");
         return {
