@@ -17,7 +17,6 @@ export const authLogin = async (
   password: string,
   res: Response
 ) => {
-  console.log(email, password);
   try {
     const user = await db.user.findUnique({
       where: {
@@ -31,25 +30,18 @@ export const authLogin = async (
         isVerified: true,
       },
     });
-
-    console.log(user);
-
     if (!user) {
       return { error: "Invalid credentials", data: null };
     } else {
-      console.log("Before passwordMatch");
       const passwordMatch = await bycript.compare(password, user.password);
-      console.log("after passwordMatch" + passwordMatch);
       if (passwordMatch) {
         const { password, ...userWithoutPassword } = user;
         const accessToken = generateAccessToken(userWithoutPassword);
         const refreshToken = generateRefreshToken(userWithoutPassword);
-        console.log(accessToken, refreshToken);
         res.cookie("refreshToken", refreshToken, {
           httpOnly: true,
           secure: true,
         });
-        console.log("After cookie");
         return {
           error: null,
           data: {
