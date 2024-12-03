@@ -15,6 +15,8 @@ export const login: RequestHandler = async (req: Request, res: Response) => {
       error: string | null;
       data: { accessToken: string | null; isVerified: boolean | null } | null;
     } = await authLogin(email, password, res);
+    console.log("returned from login model");
+    console.log(data);
     res.status(data.error ? 404 : 200).json(data);
   } catch (error) {
     res.status(500).json({ error: "An error occurred", data: null });
