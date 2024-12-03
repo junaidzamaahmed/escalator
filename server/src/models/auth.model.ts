@@ -31,6 +31,8 @@ export const authLogin = async (
       },
     });
 
+    console.log(user);
+
     if (!user) {
       return { error: "Invalid credentials", data: null };
     } else {

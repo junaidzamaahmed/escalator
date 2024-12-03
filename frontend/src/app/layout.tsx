@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { VerificationBanner } from "@/components/verificationBaner";
 import { Montserrat } from "next/font/google";
 import { Suspense } from "react";
+import { Loader } from "lucide-react";
 
 const montserrat = Montserrat({
   subsets: ["latin"],
@@ -34,20 +35,20 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.className} antialiased`}>
-        <ReduxProvider>
-          <SidebarProvider>
-            <div className="flex h-screen bg-background w-screen">
-              <SidebarComponent />
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <Suspense>
+        <Suspense fallback={<Loader />}>
+          <ReduxProvider>
+            <SidebarProvider>
+              <div className="flex h-screen bg-background w-screen">
+                <SidebarComponent />
+                <div className="flex-1 flex flex-col overflow-hidden">
                   <Navbar />
                   <VerificationBanner />
                   <main className="flex-1 overflow-y-auto p-6">{children}</main>
-                </Suspense>
+                </div>
               </div>
-            </div>
-          </SidebarProvider>
-        </ReduxProvider>
+            </SidebarProvider>
+          </ReduxProvider>
+        </Suspense>
       </body>
     </html>
   );

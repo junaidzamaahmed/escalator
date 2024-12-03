@@ -10,7 +10,6 @@ import {
 
 export const login: RequestHandler = async (req: Request, res: Response) => {
   const { email, password } = req.body;
-  console.log(email, password);
   try {
     const data: {
       error: string | null;
