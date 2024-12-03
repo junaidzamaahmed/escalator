@@ -46,15 +46,12 @@ export default function SignupPage() {
     try {
       dispatch(toggleLoading());
 
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/signup",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(values),
-          credentials: "include",
-        }
-      );
+      const response = await fetch("api/v1/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(values),
+        credentials: "include",
+      });
       const data = await response.json();
       if (response.status === 409) {
         form.setError("email", {

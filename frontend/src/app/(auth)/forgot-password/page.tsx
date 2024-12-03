@@ -49,16 +49,13 @@ export default function ForgotPasswordPage() {
 
   async function onSubmit(values: ForgotPasswordFormValues) {
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/forgot-password",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(values),
-        }
-      );
+      const response = await fetch("api/v1/auth/forgot-password", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(values),
+      });
     } catch (error) {
       console.log(error);
     }

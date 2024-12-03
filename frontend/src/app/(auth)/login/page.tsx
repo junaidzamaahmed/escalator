@@ -26,8 +26,6 @@ import { toggleLoading, userLogin } from "@/app/redux/slice";
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export default function LoginPage() {
   const router = useRouter();
 
@@ -46,7 +44,7 @@ export default function LoginPage() {
     try {
       dispatch(toggleLoading());
 
-      const response = await fetch(API_URL + "/api/v1/auth/login", {
+      const response = await fetch("/api/v1/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),

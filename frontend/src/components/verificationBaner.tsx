@@ -38,17 +38,14 @@ export function VerificationBanner({}) {
     e.preventDefault();
     dispatch(toggleLoading());
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/verify-user",
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${accessToken}`,
-          },
-          body: JSON.stringify({ verificationCode }),
-        }
-      );
+      const response = await fetch("api/v1/auth/verify-user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${accessToken}`,
+        },
+        body: JSON.stringify({ verificationCode }),
+      });
       const data = await response.json();
       if (data.error) {
         setError(data.error);
@@ -66,17 +63,13 @@ export function VerificationBanner({}) {
     // This is where you'd typically make an API call to resend the code
 
     try {
-      const response = await fetch(
-        process.env.NEXT_PUBLIC_API_URL +
-          "/api/v1/auth/resend-verification-code",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `${accessToken}`,
-          },
-        }
-      );
+      const response = await fetch("api/v1/auth/resend-verification-code", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `${accessToken}`,
+        },
+      });
       const data = await response.json();
       if (data.data.message == "User is already verified") {
         setError("");

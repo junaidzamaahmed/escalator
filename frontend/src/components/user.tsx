@@ -20,14 +20,11 @@ export default function UserButton({ isLoggedIn }: { isLoggedIn: boolean }) {
   const logout = async () => {
     try {
       dispatch(toggleLoading());
-      const res = await fetch(
-        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/logout",
-        {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-        }
-      );
+      const res = await fetch("api/v1/auth/logout", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      });
       dispatch(userLogout());
       dispatch(toggleLoading());
     } catch (e) {
