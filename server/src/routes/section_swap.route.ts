@@ -1,4 +1,5 @@
 import {
+  createsection_swap,
   deletesection_swap,
   getsection_swap,
   getsection_swapbyID,
@@ -20,6 +21,11 @@ section_swapRouter.delete(
   "/:id",
   auth(true, Role.ADMIN, Role.USER),
   deletesection_swap
+);
+section_swapRouter.post(
+  "/",
+  auth(true, Role.ADMIN, Role.USER),
+  createsection_swap
 );
 
 export default section_swapRouter;

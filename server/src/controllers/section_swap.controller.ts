@@ -1,6 +1,7 @@
 import {
   section_swap_getAll,
   section_swapbyID,
+  section_swapCreate,
   section_swapDelete,
   section_swapUpdate,
 } from "../models/section_swap.model";
@@ -83,6 +84,27 @@ export const updatesection_swap: RequestHandler = async (
         | null;
     } = await section_swapUpdate(id, values);
 
+    res.status(data.error ? 404 : 200).json(data);
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred", data: null });
+  }
+};
+
+export const createsection_swap: RequestHandler = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const data: {
+      error: string | null;
+      data:
+        | (Section_swap & {
+            user: User;
+            desiredCourse: Course;
+            currentCourse: Course;
+          })
+        | null;
+    } = await section_swapCreate(req.body);
     res.status(data.error ? 404 : 200).json(data);
   } catch (error) {
     res.status(500).json({ error: "An error occurred", data: null });

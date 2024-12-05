@@ -87,3 +87,28 @@ export const section_swapUpdate = async (id: string, values: any) => {
     return { error: "An error occurred", data: null };
   }
 };
+
+export const section_swapCreate = async (values: any) => {
+  try {
+    const section_swap:
+      | (Section_swap & {
+          user: User;
+          desiredCourse: Course;
+          currentCourse: Course;
+        })
+      | null = await db.section_swap.create({
+      data: {
+        ...values,
+      },
+      include: {
+        user: true,
+        desiredCourse: true,
+        currentCourse: true,
+      },
+    });
+
+    return { error: null, data: section_swap };
+  } catch (error) {
+    return { error: "An error occurred", data: null };
+  }
+};
