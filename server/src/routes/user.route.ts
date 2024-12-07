@@ -11,8 +11,8 @@ import { Router } from "express";
 const userRouter = Router();
 
 userRouter.get("/", auth(true, Role.ADMIN), getUsers);
-userRouter.get("/:id", auth(false, Role.ADMIN, Role.USER), getUserById);
-userRouter.put("/:id", auth(true, Role.ADMIN, Role.USER), updateUser);
-userRouter.delete("/:id", auth(true, Role.ADMIN, Role.USER), deleteUser);
+userRouter.get("/:id", auth(false, Role.ADMIN), getUserById);
+userRouter.put("/:id", auth(true, Role.ADMIN), updateUser);
+userRouter.delete("/:id", auth(true, Role.ADMIN), deleteUser);
 
 export default userRouter;
