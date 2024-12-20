@@ -20,10 +20,10 @@ import Link from "next/link";
 
 const menuItems = [
   { icon: Home, label: "Home", href: "/" },
-  { icon: Book, label: "Course Swaps", href: "/course-swaps" },
+  { icon: Book, label: "Course Swaps", href: "/section-swap" },
   { icon: FileText, label: "Resources", href: "/resources" },
   { icon: Users, label: "Alumni Network", href: "/alumni" },
-  { icon: Graduation, label: "Thesis Groups", href: "/thesis-groups" },
+  { icon: Graduation, label: "Thesis Groups", href: "/thesis" },
 ];
 
 export function SidebarComponent() {
