@@ -19,38 +19,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function EditSwapRequest({ swap, onSave, onCancel }: any) {
+export function EditSwapRequest({ swap, onSave, courses }: any) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentCourse, setCurrentCourse] = useState(swap.currentCourse.code);
-  const [currentSection, setCurrentSection] = useState(
-    swap.currentSection.toString()
+  const [currentCourse, setCurrentCourse] = useState(
+    swap.currentCourseId.toString()
   );
-  const [desiredCourse, setDesiredCourse] = useState(swap.desiredCourse.code);
+  const [currentSection, setCurrentSection] = useState(
+    swap.current_section.toString()
+  );
+  const [desiredCourse, setDesiredCourse] = useState(
+    swap.desiredCourseId.toString()
+  );
   const [desiredSections, setDesiredSections] = useState(
-    swap.desiredSections.join(", ")
+    swap.desired_section.join(", ")
   );
 
   useEffect(() => {
     if (isOpen) {
-      setCurrentCourse(swap.currentCourse.code);
-      setCurrentSection(swap.currentSection.toString());
-      setDesiredCourse(swap.desiredCourse.code);
-      setDesiredSections(swap.desiredSections.join(", "));
+      setCurrentCourse(swap.currentCourseId.toString());
+      setCurrentSection(swap.current_section.toString());
+      setDesiredCourse(swap.desiredCourseId.toString());
+      setDesiredSections(swap.desired_section.join(", "));
     }
+    setCurrentCourse(swap.currentCourseId.toString());
+    setCurrentSection(swap.current_section.toString());
+    setDesiredCourse(swap.desiredCourseId.toString());
+    setDesiredSections(swap.desired_section.join(", "));
   }, [isOpen, swap]);
 
   const handleSubmit = (event: any) => {
     event.preventDefault();
     const updatedSwap = {
-      ...swap,
-      currentCourse: { ...swap.currentCourse, code: currentCourse },
-      currentSection: parseInt(currentSection),
-      desiredCourse: { ...swap.desiredCourse, code: desiredCourse },
-      desiredSections: desiredSections
+      currentCourseId: parseInt(currentCourse),
+      current_section: parseInt(currentSection),
+      desiredCourseId: parseInt(desiredCourse),
+      desired_section: desiredSections
         .split(",")
         .map((s: any) => parseInt(s.trim())),
     };
-    onSave(updatedSwap);
+    onSave(updatedSwap, swap.id);
     setIsOpen(false);
   };
 
@@ -78,8 +85,11 @@ export function EditSwapRequest({ swap, onSave, onCancel }: any) {
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CSE101">CSE101</SelectItem>
-                <SelectItem value="MAT201">MAT201</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem key={course.code} value={course.id.toString()}>
+                    {course.code}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -91,6 +101,8 @@ export function EditSwapRequest({ swap, onSave, onCancel }: any) {
               id="currentSection"
               value={currentSection}
               onChange={(e) => setCurrentSection(e.target.value)}
+              type="number"
+              required
               className="col-span-3"
             />
           </div>
@@ -103,8 +115,11 @@ export function EditSwapRequest({ swap, onSave, onCancel }: any) {
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CSE101">CSE101</SelectItem>
-                <SelectItem value="MAT201">MAT201</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem key={course.code} value={course.id.toString()}>
+                    {course.code}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -117,6 +132,7 @@ export function EditSwapRequest({ swap, onSave, onCancel }: any) {
               value={desiredSections}
               onChange={(e) => setDesiredSections(e.target.value)}
               placeholder="e.g., 1, 2, 3"
+              required
               className="col-span-3"
             />
           </div>

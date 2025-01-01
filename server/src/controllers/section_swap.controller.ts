@@ -17,7 +17,7 @@ export const getsection_swap: RequestHandler = async (
       error: string | null;
       data:
         | (Section_swap & {
-            user: User;
+            user: Partial<User>;
             desiredCourse: Course;
             currentCourse: Course;
           })[]
@@ -39,7 +39,7 @@ export const getsection_swapbyID: RequestHandler = async (
       error: string | null;
       data:
         | (Section_swap & {
-            user: User;
+            user: Partial<User>;
             desiredCourse: Course;
             currentCourse: Course;
           })
@@ -71,18 +71,17 @@ export const updatesection_swap: RequestHandler = async (
   res: Response
 ) => {
   const { id } = req.params;
-  const values = req.body;
   try {
     const data: {
       error: string | null;
       data:
         | (Section_swap & {
-            user: User;
+            user: Partial<User>;
             desiredCourse: Course;
             currentCourse: Course;
           })
         | null;
-    } = await section_swapUpdate(id, values);
+    } = await section_swapUpdate(id, req);
 
     res.status(data.error ? 404 : 200).json(data);
   } catch (error) {
@@ -99,12 +98,12 @@ export const createsection_swap: RequestHandler = async (
       error: string | null;
       data:
         | (Section_swap & {
-            user: User;
+            user: Partial<User>;
             desiredCourse: Course;
             currentCourse: Course;
           })
         | null;
-    } = await section_swapCreate(req.body);
+    } = await section_swapCreate(req);
     res.status(data.error ? 404 : 200).json(data);
   } catch (error) {
     res.status(500).json({ error: "An error occurred", data: null });
