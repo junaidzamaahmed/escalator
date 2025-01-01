@@ -67,13 +67,13 @@ model Course {
 
 //added
 model Resources {
-  id    Int    @id @default(autoincrement())
-  title String
-
-  user     User   @relation(fields: [userId], references: [id])
+  id       Int     @id @default(autoincrement())
+  title    String
+  url      String?
+  user     User    @relation(fields: [userId], references: [id])
   userId   Int
   courseId Int
-  courses  Course @relation(fields: [courseId], references: [id])
+  courses  Course  @relation(fields: [courseId], references: [id])
 }
 
 model Alumni {
