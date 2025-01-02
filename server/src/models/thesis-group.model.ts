@@ -5,7 +5,13 @@ export const findAll = async () => {
   try {
     const requests = await db.thesisGroupRequest.findMany({
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
     return { error: null, data: requests };

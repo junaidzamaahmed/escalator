@@ -17,13 +17,16 @@ export const refreshAccessToken = createAsyncThunk(
     if (decodedToken && decodedToken.exp! * 1000 > Date.now() && !force) {
       return null;
     }
-    const response = await fetch(`api/v1/auth/refresh-token`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-    });
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + `/api/v1/auth/refresh-token`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      }
+    );
     const data = response.json();
     return data;
   }

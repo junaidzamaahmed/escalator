@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,31 +19,53 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function AddSwapRequest({ onAdd }: { onAdd: any }) {
+export function AddSwapRequest({ onAdd, courses }: any) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentCourse, setCurrentCourse] = useState("");
+  const [currentCourse, setCurrentCourse] = useState(
+    courses[0]?.id.toLocaleString() || "2"
+  );
   const [currentSection, setCurrentSection] = useState("");
-  const [desiredCourse, setDesiredCourse] = useState("");
-  const [desiredSections, setDesiredSections] = useState("");
-
-  const handleSubmit = (event: any) => {
+  const [desiredCourse, setDesiredCourse] = useState(
+    courses[0]?.id.toLocaleString() || "2"
+  );
+  const [desiredSection, setDesiredSection] = useState("");
+  useEffect(() => {
+    setCurrentCourse(courses[0]?.id.toLocaleString() || "2");
+    setDesiredCourse(courses[0]?.id.toLocaleString() || "2");
+  }, []);
+  const handleSubmit = async (event: any) => {
     event.preventDefault();
     const newSwap = {
-      currentCourse: { code: currentCourse, title: "Course Title" }, // In a real app, you'd fetch the title
-      currentSection: parseInt(currentSection),
-      desiredCourse: { code: desiredCourse, title: "Course Title" }, // In a real app, you'd fetch the title
-      desiredSections: desiredSections
+      currentCourseId: parseInt(currentCourse),
+      current_section: parseInt(currentSection),
+      desiredCourseId: parseInt(desiredCourse),
+      desired_section: desiredSection
         .split(",")
-        .map((s) => parseInt(s.trim())),
-      user: { name: "Current User", email: "user@example.com" }, // In a real app, you'd get this from the user's session
+        .map((s: string) => parseInt(s.trim())),
     };
-    onAdd(newSwap);
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/api/v1/section_swap",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("escalator_access_token") || "",
+        },
+        body: JSON.stringify(newSwap),
+      }
+    );
+    const data = await response.json();
+    if (data.error) {
+      console.error(data.error);
+      return;
+    }
+    onAdd(data.data);
     setIsOpen(false);
     // Reset form fields
     setCurrentCourse("");
     setCurrentSection("");
     setDesiredCourse("");
-    setDesiredSections("");
+    setDesiredSection("");
   };
 
   return (
@@ -63,14 +85,23 @@ export function AddSwapRequest({ onAdd }: { onAdd: any }) {
             <label htmlFor="currentCourse" className="text-right">
               Current Course
             </label>
-            <Select value={currentCourse} onValueChange={setCurrentCourse}>
+            <Select
+              required
+              value={currentCourse}
+              onValueChange={setCurrentCourse}
+            >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CSE101">CSE101</SelectItem>
-                <SelectItem value="MAT201">MAT201</SelectItem>
-                <SelectItem value="PHY301">PHY301</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem
+                    key={course.code}
+                    value={course.id.toLocaleString()}
+                  >
+                    {course.code}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -78,29 +109,37 @@ export function AddSwapRequest({ onAdd }: { onAdd: any }) {
             <label htmlFor="currentSection" className="text-right">
               Current Section
             </label>
-            <Select value={currentSection} onValueChange={setCurrentSection}>
-              <SelectTrigger className="col-span-3">
-                <SelectValue placeholder="Select section" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1">Section 1</SelectItem>
-                <SelectItem value="2">Section 2</SelectItem>
-                <SelectItem value="3">Section 3</SelectItem>
-              </SelectContent>
-            </Select>
+            <Input
+              required
+              id="currentSection"
+              value={currentSection}
+              onChange={(e) => setCurrentSection(e.target.value)}
+              placeholder="e.g. 1"
+              type="number"
+              className="col-span-3"
+            />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <label htmlFor="desiredCourse" className="text-right">
               Desired Course
             </label>
-            <Select value={desiredCourse} onValueChange={setDesiredCourse}>
+            <Select
+              required={true}
+              value={desiredCourse}
+              onValueChange={setDesiredCourse}
+            >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select course" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="CSE101">CSE101</SelectItem>
-                <SelectItem value="MAT201">MAT201</SelectItem>
-                <SelectItem value="PHY301">PHY301</SelectItem>
+                {courses.map((course: any) => (
+                  <SelectItem
+                    key={course.code}
+                    value={course.id.toLocaleString()}
+                  >
+                    {course.code}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -109,10 +148,12 @@ export function AddSwapRequest({ onAdd }: { onAdd: any }) {
               Desired Sections
             </label>
             <Input
+              required
               id="desiredSections"
-              value={desiredSections}
-              onChange={(e) => setDesiredSections(e.target.value)}
-              placeholder="e.g., 1, 2, 3"
+              value={desiredSection}
+              onChange={(e) => setDesiredSection(e.target.value)}
+              placeholder="e.g. 1,2,3"
+              // type="number"
               className="col-span-3"
             />
           </div>

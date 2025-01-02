@@ -58,14 +58,17 @@ export default function ResetPasswordPage() {
   async function onSubmit(values: ResetPasswordFormValues) {
     dispatch(toggleLoading());
     try {
-      const response = await fetch("api/v1/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(values),
-        credentials: "include",
-      });
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/auth/reset-password",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
+          credentials: "include",
+        }
+      );
       const data = await response.json();
       if (response.ok) {
         dispatch(userLogin(data.data.accessToken));

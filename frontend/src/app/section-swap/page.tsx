@@ -70,8 +70,8 @@ const mockSwaps = [
 ];
 
 export default function CourseSwapsPage() {
-  const [swaps, setSwaps] = useState(mockSwaps);
-  const [filteredSwaps, setFilteredSwaps] = useState(mockSwaps);
+  const [swaps, setSwaps] = useState<any>([]);
+  const [filteredSwaps, setFilteredSwaps] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     courseCode: "",
@@ -79,13 +79,32 @@ export default function CourseSwapsPage() {
     desiredSection: "",
     dateRange: [0, 30],
   });
+  const [courses, setCourses] = useState<any>([]);
 
   useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/section_swap"
+      );
+      const data = await response.json();
+      setSwaps(data.data);
+    }
+    async function fetchCourses() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/course"
+      );
+      const data = await response.json();
+      setCourses(data.data);
+    }
+    fetchCourses();
+    fetchData();
+  }, []);
+  useEffect(() => {
     applyFiltersAndSearch();
-  }, [searchTerm, filters, swaps]);
+  }, [filters, searchTerm, swaps, courses]);
 
   const applyFiltersAndSearch = () => {
-    let result = swaps.filter((swap) => {
+    let result = swaps.filter((swap: any) => {
       const matchesSearch =
         swap.currentCourse.code
           .toLowerCase()
@@ -99,17 +118,16 @@ export default function CourseSwapsPage() {
             .includes(filters.courseCode.toLowerCase())
         : true;
       const matchesCurrentSection = filters.currentSection
-        ? swap.currentSection.toString() === filters.currentSection
+        ? swap.current_section.toString() === filters.currentSection
         : true;
       const matchesDesiredSection = filters.desiredSection
-        ? swap.desiredSections.includes(parseInt(filters.desiredSection))
+        ? swap.desired_section.includes(parseInt(filters.desiredSection))
         : true;
       const matchesDateRange =
-        swap.createdAt >=
+        new Date(swap.created_at) >=
           new Date(Date.now() - filters.dateRange[1] * 24 * 60 * 60 * 1000) &&
-        swap.createdAt <=
+        new Date(swap.created_at) <=
           new Date(Date.now() - filters.dateRange[0] * 24 * 60 * 60 * 1000);
-
       return (
         matchesSearch &&
         matchesCourseCode &&
@@ -118,7 +136,6 @@ export default function CourseSwapsPage() {
         matchesDateRange
       );
     });
-
     setFilteredSwaps(result);
   };
 
@@ -137,14 +154,37 @@ export default function CourseSwapsPage() {
     ]);
   };
 
-  const handleEditSwap = (updatedSwap: any) => {
-    setSwaps(
-      swaps.map((swap) => (swap.id === updatedSwap.id ? updatedSwap : swap))
+  const handleEditSwap = async (updatedSwap: any, id: any) => {
+    const response = await fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/api/v1/section_swap/" + id,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: localStorage.getItem("escalator_access_token") || "",
+        },
+        body: JSON.stringify(updatedSwap),
+      }
     );
+    const data = await response.json();
+    if (data.error) {
+      console.error(data.error);
+      return;
+    }
+    setSwaps(swaps.map((swap: any) => (swap.id === id ? data.data : swap)));
   };
 
   const handleDeleteSwap = (swapId: any) => {
-    setSwaps(swaps.filter((swap) => swap.id !== swapId));
+    const response = fetch(
+      process.env.NEXT_PUBLIC_API_URL + "/api/v1/section_swap/" + swapId,
+      {
+        method: "DELETE",
+        headers: {
+          authorization: localStorage.getItem("escalator_access_token") || "",
+        },
+      }
+    );
+    setSwaps(swaps.filter((swap: any) => swap.id !== swapId));
   };
   return (
     <div className="flex flex-col md:flex-row h-screen bg-background">
@@ -174,7 +214,7 @@ export default function CourseSwapsPage() {
                     <CourseSwapsSidebar onFilterChange={handleFilterChange} />
                   </SheetContent>
                 </Sheet>
-                <AddSwapRequest onAdd={handleAddSwap} />
+                <AddSwapRequest onAdd={handleAddSwap} courses={courses} />
               </div>
             </div>
 
@@ -190,23 +230,26 @@ export default function CourseSwapsPage() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {filteredSwaps.map((swap) => (
+              {filteredSwaps.map((swap: any) => (
                 <Card key={swap.id} className="flex flex-col">
                   <CardHeader>
                     <CardTitle className="flex justify-between items-center">
                       <span>{swap.currentCourse.code}</span>
                       <span className="text-sm font-normal text-muted-foreground">
-                        {swap.createdAt.toLocaleDateString()}
+                        {new Date(swap.created_at).toLocaleDateString()}
                       </span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="flex-grow">
                     <p className="font-semibold">{swap.currentCourse.title}</p>
                     <p className="text-sm text-muted-foreground mb-2">
-                      Current Section: {swap.currentSection}
+                      Current Section: {swap.current_section}
+                    </p>
+                    <p className="font-semibold">
+                      Desired Course: {swap.desiredCourse.code}
                     </p>
                     <p className="text-sm">
-                      Desired Sections: {swap.desiredSections.join(", ")}
+                      Desired Sections: {swap.desired_section.join(", ")}
                     </p>
                     <p className="text-sm text-muted-foreground mt-2">
                       Requested by: {swap.user.name}
@@ -233,7 +276,7 @@ export default function CourseSwapsPage() {
                               {swap.currentCourse.code} -{" "}
                               {swap.currentCourse.title}
                             </p>
-                            <p>Section: {swap.currentSection}</p>
+                            <p>Section: {swap.current_section}</p>
                           </div>
                           <div>
                             <h3 className="font-semibold">Desired Course</h3>
@@ -241,7 +284,7 @@ export default function CourseSwapsPage() {
                               {swap.desiredCourse.code} -{" "}
                               {swap.desiredCourse.title}
                             </p>
-                            <p>Sections: {swap.desiredSections.join(", ")}</p>
+                            <p>Sections: {swap.desired_section.join(", ")}</p>
                           </div>
                           <div>
                             <h3 className="font-semibold">Requested By</h3>
@@ -250,13 +293,21 @@ export default function CourseSwapsPage() {
                           </div>
                           <div>
                             <h3 className="font-semibold">Date Requested</h3>
-                            <p>{swap.createdAt.toLocaleString()}</p>
+                            <p>
+                              {new Date(swap.created_at)
+                                .toLocaleDateString()
+                                .toLocaleString()}
+                            </p>
                           </div>
                         </div>
                       </DialogContent>
                     </Dialog>
                     <div className="flex space-x-2">
-                      <EditSwapRequest swap={swap} onSave={handleEditSwap} />
+                      <EditSwapRequest
+                        swap={swap}
+                        onSave={handleEditSwap}
+                        courses={courses}
+                      />
                       <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="outline" size="sm">

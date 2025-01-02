@@ -4,14 +4,21 @@ import { Course, Section_swap, User } from "@prisma/client";
 export const section_swap_getAll = async () => {
   try {
     const section_swap: (Section_swap & {
-      user: User;
+      user: Partial<User>;
       desiredCourse: Course;
       currentCourse: Course;
     })[] = await db.section_swap.findMany({
       include: {
         desiredCourse: true,
         currentCourse: true,
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
       },
     });
 
@@ -25,7 +32,7 @@ export const section_swapbyID = async (id: string) => {
   try {
     const section_swap:
       | (Section_swap & {
-          user: User;
+          user: Partial<User>;
           desiredCourse: Course;
           currentCourse: Course;
         })
@@ -36,7 +43,14 @@ export const section_swapbyID = async (id: string) => {
       include: {
         desiredCourse: true,
         currentCourse: true,
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
       },
     });
 
@@ -60,11 +74,11 @@ export const section_swapDelete = async (id: string) => {
   }
 };
 
-export const section_swapUpdate = async (id: string, values: any) => {
+export const section_swapUpdate = async (id: string, req: any) => {
   try {
     const section_swap:
       | (Section_swap & {
-          user: User;
+          user: Partial<User>;
           desiredCourse: Course;
           currentCourse: Course;
         })
@@ -73,10 +87,17 @@ export const section_swapUpdate = async (id: string, values: any) => {
         id: parseInt(id),
       },
       data: {
-        ...values,
+        ...req.body,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
         desiredCourse: true,
         currentCourse: true,
       },
@@ -88,20 +109,28 @@ export const section_swapUpdate = async (id: string, values: any) => {
   }
 };
 
-export const section_swapCreate = async (values: any) => {
+export const section_swapCreate = async (req: any) => {
   try {
     const section_swap:
       | (Section_swap & {
-          user: User;
+          user: Partial<User>;
           desiredCourse: Course;
           currentCourse: Course;
         })
       | null = await db.section_swap.create({
       data: {
-        ...values,
+        ...req.body,
+        userId: req.user.id,
       },
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+          },
+        },
         desiredCourse: true,
         currentCourse: true,
       },
@@ -109,6 +138,7 @@ export const section_swapCreate = async (values: any) => {
 
     return { error: null, data: section_swap };
   } catch (error) {
+    console.log(error);
     return { error: "An error occurred", data: null };
   }
 };
