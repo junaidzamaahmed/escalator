@@ -44,48 +44,48 @@ import { Badge } from "@/components/ui/badge";
 import { ThesisGroupsSidebar } from "@/components/thesis-groups-sidebar";
 
 // Mock data for thesis group requests
-const mockRequests = [
-  {
-    id: 1,
-    startingSemester: "Fall 2023",
-    areaOfInterest: ["Machine Learning"],
-    thesisTopic: "Explainable AI in Healthcare",
-    currentGroupSize: 2,
-    skills: ["Python", "TensorFlow", "Data Analysis"],
-    description:
-      "We are looking for team members interested in applying machine learning techniques to healthcare data.",
-    user: { name: "Alice Johnson", email: "alice@example.com" },
-    createdAt: new Date("2024-12-12"),
-  },
-  {
-    id: 2,
-    startingSemester: "Spring 2024",
-    areaOfInterest: ["Cybersecurity"],
-    thesisTopic: "Blockchain-based Identity Management",
-    currentGroupSize: 1,
-    skills: ["Blockchain", "Cryptography", "Java"],
-    description:
-      "Seeking team members to work on a novel approach to identity management using blockchain technology.",
-    user: { name: "Bob Smith", email: "bob@example.com" },
-    createdAt: new Date("2024-12-12"),
-  },
-  {
-    id: 3,
-    startingSemester: "Fall 2023",
-    areaOfInterest: ["Natural Language Processing"],
-    thesisTopic: "Multilingual Sentiment Analysis",
-    currentGroupSize: 2,
-    skills: ["Python", "NLP", "Deep Learning"],
-    description:
-      "We are developing a sentiment analysis model that works across multiple languages.",
-    user: { name: "Charlie Brown", email: "charlie@example.com" },
-    createdAt: new Date("2024-12-12"),
-  },
-];
+// const mockRequests = [
+//   {
+//     id: 1,
+//     startingSemester: "Fall 2023",
+//     areaOfInterest: ["Machine Learning"],
+//     thesisTopic: "Explainable AI in Healthcare",
+//     currentGroupSize: 2,
+//     skills: ["Python", "TensorFlow", "Data Analysis"],
+//     description:
+//       "We are looking for team members interested in applying machine learning techniques to healthcare data.",
+//     user: { name: "Alice Johnson", email: "alice@example.com" },
+//     createdAt: new Date("2024-12-12"),
+//   },
+//   {
+//     id: 2,
+//     startingSemester: "Spring 2024",
+//     areaOfInterest: ["Cybersecurity"],
+//     thesisTopic: "Blockchain-based Identity Management",
+//     currentGroupSize: 1,
+//     skills: ["Blockchain", "Cryptography", "Java"],
+//     description:
+//       "Seeking team members to work on a novel approach to identity management using blockchain technology.",
+//     user: { name: "Bob Smith", email: "bob@example.com" },
+//     createdAt: new Date("2024-12-12"),
+//   },
+//   {
+//     id: 3,
+//     startingSemester: "Fall 2023",
+//     areaOfInterest: ["Natural Language Processing"],
+//     thesisTopic: "Multilingual Sentiment Analysis",
+//     currentGroupSize: 2,
+//     skills: ["Python", "NLP", "Deep Learning"],
+//     description:
+//       "We are developing a sentiment analysis model that works across multiple languages.",
+//     user: { name: "Charlie Brown", email: "charlie@example.com" },
+//     createdAt: new Date("2024-12-12"),
+//   },
+// ];
 
 export default function ThesisGroupRequestsPage() {
-  const [requests, setRequests] = useState(mockRequests);
-  const [filteredRequests, setFilteredRequests] = useState(mockRequests);
+  const [requests, setRequests] = useState<any>([]);
+  const [filteredRequests, setFilteredRequests] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [filters, setFilters] = useState({
     areaOfInterest: "",
@@ -94,16 +94,26 @@ export default function ThesisGroupRequestsPage() {
     skills: "",
     dateRange: [0, 30],
   });
-
+  useEffect(() => {
+    async function fetchData() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/thesis-group"
+      );
+      const data = await response.json();
+      setRequests(data.data);
+      console.log(data.data);
+    }
+    fetchData();
+  }, []);
   useEffect(() => {
     applyFiltersAndSearch();
   }, [searchTerm, filters, requests]);
 
   const applyFiltersAndSearch = () => {
-    let result = requests.filter((req) => {
+    let result = requests.filter((req: any) => {
       const matchesSearch =
         req.thesisTopic.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.areaOfInterest.some((area) =>
+        req.areaOfInterest.some((area: any) =>
           area.toLowerCase().includes(searchTerm.toLowerCase())
         );
       const matchesArea =
@@ -120,13 +130,13 @@ export default function ThesisGroupRequestsPage() {
         req.currentGroupSize.toString() === filters.groupSize;
       const matchesSkills =
         filters.skills === "" ||
-        req.skills.some((skill) =>
+        req.skills.some((skill: any) =>
           skill.toLowerCase().includes(filters.skills.toLowerCase())
         );
       const matchesDateRange =
-        req.createdAt >=
+        new Date(req.createdAt) >=
           new Date(Date.now() - filters.dateRange[1] * 24 * 60 * 60 * 1000) &&
-        req.createdAt <=
+        new Date(req.createdAt) <=
           new Date(Date.now() - filters.dateRange[0] * 24 * 60 * 60 * 1000);
 
       return (
@@ -159,14 +169,14 @@ export default function ThesisGroupRequestsPage() {
 
   const handleEditRequest = (updatedRequest: any) => {
     setRequests(
-      requests.map((req) =>
+      requests.map((req: any) =>
         req.id === updatedRequest.id ? updatedRequest : req
       )
     );
   };
 
   const handleDeleteRequest = (requestId: any) => {
-    setRequests(requests.filter((req) => req.id !== requestId));
+    setRequests(requests.filter((req: any) => req.id !== requestId));
   };
 
   return (
@@ -214,7 +224,7 @@ export default function ThesisGroupRequestsPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredRequests.map((request) => (
+            {filteredRequests.map((request: any) => (
               <Card key={request.id} className="flex flex-col max-w-[80vw]">
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center">
@@ -285,7 +295,7 @@ export default function ThesisGroupRequestsPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold">Date Requested</h3>
-                          <p>{request.createdAt.toLocaleString()}</p>
+                          <p>{new Date(request.createdAt).toLocaleString()}</p>
                         </div>
                       </div>
                     </DialogContent>
