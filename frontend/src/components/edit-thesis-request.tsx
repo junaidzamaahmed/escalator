@@ -30,6 +30,7 @@ export function EditThesisRequest({ request, onSave }: any) {
     skills: "",
     description: "",
   });
+  const [changed, setChanged] = useState({ id: null });
 
   useEffect(() => {
     if (isOpen) {
@@ -47,17 +48,33 @@ export function EditThesisRequest({ request, onSave }: any) {
   const handleChange = (e: any) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    setChanged((prev) => ({ ...prev, [name]: value, id: request.id }));
   };
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    onSave({
-      ...request,
-      ...formData,
-      skills: formData.skills.split(",").map((skill) => skill.trim()),
-      areaOfInterest: [formData.areaOfInterest],
-      currentGroupSize: parseInt(formData.currentGroupSize),
-    });
+    // onSave({
+    //   ...request,
+    //   ...formData,
+    //   skills: formData.skills.split(",").map((skill) => skill.trim()),
+    //   areaOfInterest: [formData.areaOfInterest],
+    //   currentGroupSize: parseInt(formData.currentGroupSize),
+    // });
+    if (changed.id != null) {
+      let curr = changed;
+      if ("skills" in curr) {
+        curr["skills"] = (curr.skills as string)
+          .split(",")
+          .map((skill: any) => skill.trim());
+      }
+      if ("areaOfInterest" in curr) {
+        curr["areaOfInterest"] = [curr.areaOfInterest];
+      }
+      if ("currentGroupSize" in curr) {
+        curr["currentGroupSize"] = parseInt(curr.currentGroupSize as string);
+      }
+      onSave(curr);
+    }
     setIsOpen(false);
   };
 
@@ -122,9 +139,10 @@ export function EditThesisRequest({ request, onSave }: any) {
             <Select
               name="currentGroupSize"
               value={formData.currentGroupSize}
-              onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, currentGroupSize: value }))
-              }
+              onValueChange={(value) => {
+                setFormData((prev) => ({ ...prev, currentGroupSize: value }));
+                handleChange({ target: { name: "currentGroupSize", value } });
+              }}
             >
               <SelectTrigger className="col-span-3">
                 <SelectValue placeholder="Select group size" />

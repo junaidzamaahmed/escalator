@@ -40,6 +40,7 @@ export function AddThesisRequest({ onAdd }: any) {
     e.preventDefault();
     onAdd({
       ...formData,
+      currentGroupSize: parseInt(formData.currentGroupSize),
       skills: formData.skills.split(",").map((skill) => skill.trim()),
       areaOfInterest: [formData.areaOfInterest], // Convert to array as per schema
     });

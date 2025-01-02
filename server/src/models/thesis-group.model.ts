@@ -4,6 +4,7 @@ import { db } from "src/utils/db";
 export const findAll = async () => {
   try {
     const requests = await db.thesisGroupRequest.findMany({
+      orderBy: [{ updatedAt: "desc" }],
       include: {
         user: {
           select: {
@@ -39,7 +40,13 @@ export const create = async (data: Omit<ThesisGroupRequest, "id">) => {
     const request = await db.thesisGroupRequest.create({
       data,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
     return { error: null, data: request };
@@ -54,7 +61,13 @@ export const update = async (id: number, data: Partial<ThesisGroupRequest>) => {
       where: { id },
       data,
       include: {
-        user: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
     return { error: null, data: request };
