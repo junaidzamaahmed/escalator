@@ -43,46 +43,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ThesisGroupsSidebar } from "@/components/thesis-groups-sidebar";
 
-// Mock data for thesis group requests
-// const mockRequests = [
-//   {
-//     id: 1,
-//     startingSemester: "Fall 2023",
-//     areaOfInterest: ["Machine Learning"],
-//     thesisTopic: "Explainable AI in Healthcare",
-//     currentGroupSize: 2,
-//     skills: ["Python", "TensorFlow", "Data Analysis"],
-//     description:
-//       "We are looking for team members interested in applying machine learning techniques to healthcare data.",
-//     user: { name: "Alice Johnson", email: "alice@example.com" },
-//     createdAt: new Date("2024-12-12"),
-//   },
-//   {
-//     id: 2,
-//     startingSemester: "Spring 2024",
-//     areaOfInterest: ["Cybersecurity"],
-//     thesisTopic: "Blockchain-based Identity Management",
-//     currentGroupSize: 1,
-//     skills: ["Blockchain", "Cryptography", "Java"],
-//     description:
-//       "Seeking team members to work on a novel approach to identity management using blockchain technology.",
-//     user: { name: "Bob Smith", email: "bob@example.com" },
-//     createdAt: new Date("2024-12-12"),
-//   },
-//   {
-//     id: 3,
-//     startingSemester: "Fall 2023",
-//     areaOfInterest: ["Natural Language Processing"],
-//     thesisTopic: "Multilingual Sentiment Analysis",
-//     currentGroupSize: 2,
-//     skills: ["Python", "NLP", "Deep Learning"],
-//     description:
-//       "We are developing a sentiment analysis model that works across multiple languages.",
-//     user: { name: "Charlie Brown", email: "charlie@example.com" },
-//     createdAt: new Date("2024-12-12"),
-//   },
-// ];
-
 export default function ThesisGroupRequestsPage() {
   const [requests, setRequests] = useState<any>([]);
   const [filteredRequests, setFilteredRequests] = useState<any>([]);
@@ -101,7 +61,6 @@ export default function ThesisGroupRequestsPage() {
       );
       const data = await response.json();
       setRequests(data.data);
-      console.log(data.data);
     }
     fetchData();
   }, []);
@@ -148,7 +107,6 @@ export default function ThesisGroupRequestsPage() {
         matchesDateRange
       );
     });
-
     setFilteredRequests(result);
   };
 
@@ -160,23 +118,83 @@ export default function ThesisGroupRequestsPage() {
     setFilters(newFilters);
   };
 
-  const handleAddRequest = (newRequest: any) => {
-    setRequests([
-      ...requests,
-      { ...newRequest, id: requests.length + 1, createdAt: new Date() },
-    ]);
+  const handleAddRequest = async (newRequest: any) => {
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/thesis-group",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: localStorage.getItem("escalator_access_token") || "",
+          },
+          body: JSON.stringify(newRequest),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (data.error) {
+        console.log("Failed to create thesis group request", data.error);
+        return;
+      }
+      setRequests([...requests, data.data]);
+    } catch (error) {
+      console.error("Failed to create thesis group request", error);
+    }
   };
 
-  const handleEditRequest = (updatedRequest: any) => {
-    setRequests(
-      requests.map((req: any) =>
-        req.id === updatedRequest.id ? updatedRequest : req
-      )
-    );
+  const handleEditRequest = async (updatedRequest: any) => {
+    // setRequests(
+    //   requests.map((req: any) =>
+    //     req.id === updatedRequest.id ? updatedRequest : req
+    //   )
+    // );
+    console.log(updatedRequest);
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL +
+          `/api/v1/thesis-group/${updatedRequest.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: localStorage.getItem("escalator_access_token") || "",
+          },
+          body: JSON.stringify(updatedRequest),
+          credentials: "include",
+        }
+      );
+      const data = await response.json();
+      if (data.error) {
+        console.log("Failed to update thesis group request", data.error);
+        return;
+      }
+      setRequests(
+        requests.map((req: any) =>
+          req.id === updatedRequest.id ? data.data : req
+        )
+      );
+    } catch (error) {
+      console.log("Failed to update thesis group request", error);
+    }
   };
 
   const handleDeleteRequest = (requestId: any) => {
-    setRequests(requests.filter((req: any) => req.id !== requestId));
+    try {
+      fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/thesis-group/${requestId}`,
+        {
+          method: "DELETE",
+          headers: {
+            authorization: localStorage.getItem("escalator_access_token") || "",
+          },
+          credentials: "include",
+        }
+      );
+      setRequests(requests.filter((req: any) => req.id !== requestId));
+    } catch (error) {
+      console.log("Failed to delete thesis group request", error);
+    }
   };
 
   return (
