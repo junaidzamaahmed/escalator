@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,62 +22,43 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 
-// Mock data for courses
-const mockCourses = [
-  {
-    id: 1,
-    code: "CSE101",
-    name: "Introduction to Computer Science",
-    department: "Computer Science",
-    level: "Undergraduate",
-  },
-  {
-    id: 2,
-    code: "MAT201",
-    name: "Linear Algebra",
-    department: "Mathematics",
-    level: "Undergraduate",
-  },
-  {
-    id: 3,
-    code: "PHY301",
-    name: "Classical Mechanics",
-    department: "Physics",
-    level: "Undergraduate",
-  },
-  {
-    id: 4,
-    code: "ENG401",
-    name: "Advanced Writing",
-    department: "English",
-    level: "Graduate",
-  },
-  {
-    id: 5,
-    code: "BIO501",
-    name: "Molecular Biology",
-    department: "Biology",
-    level: "Graduate",
-  },
-];
-
 export default function ResourcesPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [department, setDepartment] = useState("");
-  const [level, setLevel] = useState("");
+  const [departments, setDepartments] = useState<any>([]);
+  const [courses, setCourses] = useState<any>([]);
 
-  const filteredCourses = mockCourses.filter(
-    (course) =>
+  useEffect(() => {
+    // Fetch courses from the backend
+    async function fetchCourses() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + "/api/v1/course"
+      );
+      const data = await response.json();
+      if (!data.error) {
+        setCourses(data.data);
+        // Extract unique departments from the courses
+        let uniqueDepartments = data.data.map(
+          (course: any) => course.Department
+        );
+        uniqueDepartments = uniqueDepartments.filter(
+          (o: any, index: any, arr: any) =>
+            arr.findIndex(
+              (item: any) => JSON.stringify(item) === JSON.stringify(o)
+            ) === index
+        );
+        setDepartments(uniqueDepartments);
+      } else console.log(data.error);
+    }
+    fetchCourses();
+  }, []);
+
+  const filteredCourses = courses.filter(
+    (course: any) =>
       (course.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        course.name.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (department === "" || course.department === department) &&
-      (level === "" || course.level === level)
+        course.title.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (department === "" || course.Department.id === department)
   );
-
-  const departments = [
-    ...new Set(mockCourses.map((course) => course.department)),
-  ];
-  const levels = [...new Set(mockCourses.map((course) => course.level))];
 
   const FilterContent = () => (
     <div className="space-y-4">
@@ -90,28 +71,9 @@ export default function ResourcesPage() {
             <SelectValue placeholder="Select department" />
           </SelectTrigger>
           <SelectContent>
-            {/* <SelectItem value="">All Departments</SelectItem> */}
-            {departments.map((dept) => (
-              <SelectItem key={dept} value={dept}>
-                {dept}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-      <div className="space-y-2">
-        <label htmlFor="level" className="text-sm font-medium">
-          Level
-        </label>
-        <Select value={level} onValueChange={setLevel}>
-          <SelectTrigger id="level">
-            <SelectValue placeholder="Select level" />
-          </SelectTrigger>
-          <SelectContent>
-            {/* <SelectItem value="">All Levels</SelectItem> */}
-            {levels.map((lvl) => (
-              <SelectItem key={lvl} value={lvl}>
-                {lvl}
+            {departments.map((dept: any) => (
+              <SelectItem key={dept.id} value={dept.id}>
+                {dept.name}
               </SelectItem>
             ))}
           </SelectContent>
@@ -171,19 +133,19 @@ export default function ResourcesPage() {
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredCourses.map((course) => (
+            {filteredCourses.map((course: any) => (
               <Link href={`/resources/${course.id}`} key={course.id}>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer">
                   <CardHeader>
                     <CardTitle>{course.code}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="font-semibold">{course.name}</p>
+                    <p className="font-semibold">{course.title}</p>
                     <p className="text-sm text-muted-foreground mt-2">
-                      {course.department}
+                      {course.Department.name}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {course.level}
+                      Undergraduate
                     </p>
                   </CardContent>
                 </Card>

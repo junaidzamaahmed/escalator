@@ -19,13 +19,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export function AddResourceForm({ onAdd, courses }: any) {
+export function AddResourceForm({ onAdd, course }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({
     title: "",
     url: "",
     type: "",
-    author: "",
   });
 
   const handleChange = (e: any) => {
@@ -37,10 +36,10 @@ export function AddResourceForm({ onAdd, courses }: any) {
     e.preventDefault();
     onAdd({
       ...formData,
-      courseId: courses[0].id,
+      courseId: course?.id,
     });
     setIsOpen(false);
-    setFormData({ title: "", url: "", type: "", author: "" });
+    setFormData({ title: "", url: "", type: "" });
   };
 
   return (
@@ -52,7 +51,7 @@ export function AddResourceForm({ onAdd, courses }: any) {
         <DialogHeader>
           <DialogTitle>Add New Resource</DialogTitle>
           <DialogDescription>
-            Enter the details for the new resource for {courses[0].code}.
+            Enter the details for the new resource for {course?.code}.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
@@ -103,18 +102,6 @@ export function AddResourceForm({ onAdd, courses }: any) {
                 <SelectItem value="Other">Other</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="author" className="text-right">
-              Author
-            </label>
-            <Input
-              id="author"
-              name="author"
-              value={formData.author}
-              onChange={handleChange}
-              className="col-span-3"
-            />
           </div>
           <Button type="submit" className="ml-auto">
             Add Resource
