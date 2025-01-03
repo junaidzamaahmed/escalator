@@ -25,7 +25,6 @@ export function EditResourceForm({ resource, onSave, courses }: any) {
     title: "",
     url: "",
     type: "",
-    author: "",
   });
 
   useEffect(() => {
@@ -34,7 +33,6 @@ export function EditResourceForm({ resource, onSave, courses }: any) {
         title: resource.title,
         url: resource.url || "",
         type: resource.type || "",
-        author: resource.author || "",
       });
     }
   }, [isOpen, resource]);
@@ -46,10 +44,7 @@ export function EditResourceForm({ resource, onSave, courses }: any) {
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    onSave({
-      ...resource,
-      ...formData,
-    });
+    onSave(resource.id, formData);
     setIsOpen(false);
   };
 
@@ -116,18 +111,7 @@ export function EditResourceForm({ resource, onSave, courses }: any) {
               </SelectContent>
             </Select>
           </div>
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="author" className="text-right">
-              Author
-            </label>
-            <Input
-              id="author"
-              name="author"
-              value={formData.author}
-              onChange={handleChange}
-              className="col-span-3"
-            />
-          </div>
+
           <Button type="submit" className="ml-auto">
             Save Changes
           </Button>

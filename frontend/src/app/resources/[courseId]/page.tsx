@@ -12,14 +12,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Search,
-  Trash2,
-  ArrowRight,
-  ExternalLink,
-  ArrowLeft,
-  Filter,
-} from "lucide-react";
+import { Search, Trash2, ExternalLink, ArrowLeft, Filter } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -48,48 +41,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetClose,
 } from "@/components/ui/sheet";
-
-// Mock data for courses and resources
-const mockCourses = [
-  { id: 1, code: "CSE101", name: "Introduction to Computer Science" },
-  { id: 2, code: "MAT201", name: "Linear Algebra" },
-  { id: 3, code: "PHY301", name: "Classical Mechanics" },
-];
-
-const mockResources = [
-  {
-    id: 1,
-    title: "Introduction to Algorithms",
-    url: "https://example.com/intro-to-algorithms",
-    userId: 1,
-    courseId: 1,
-    createdAt: new Date("2023-05-01"),
-    type: "Article",
-    author: "John Doe",
-  },
-  {
-    id: 2,
-    title: "Linear Algebra and Its Applications",
-    url: "https://example.com/linear-algebra-applications",
-    userId: 2,
-    courseId: 2,
-    createdAt: new Date("2023-05-02"),
-    type: "Book",
-    author: "Jane Smith",
-  },
-  {
-    id: 3,
-    title: "Fundamentals of Physics",
-    url: "https://example.com/fundamentals-of-physics",
-    userId: 3,
-    courseId: 3,
-    createdAt: new Date("2023-05-03"),
-    type: "Video",
-    author: "Alice Johnson",
-  },
-];
 
 const FilterContent = ({
   resourceType,
@@ -108,7 +60,6 @@ const FilterContent = ({
           <SelectValue placeholder="Select type" />
         </SelectTrigger>
         <SelectContent>
-          {/* <SelectItem value="">All Types</SelectItem> */}
           {resourceTypes.map((type: any) => (
             <SelectItem key={type} value={type}>
               {type}
@@ -138,35 +89,40 @@ const FilterContent = ({
 export default function CourseResourcesPage() {
   const params = useParams();
   const courseId = parseInt(params.courseId as string);
-  const course = mockCourses.find((c) => c.id === courseId);
-
-  const [resources, setResources] = useState(mockResources);
-  const [filteredResources, setFilteredResources] = useState(mockResources);
+  const [course, setCourse] = useState<any>(null);
+  const [resources, setResources] = useState<any>([]);
+  const [filteredResources, setFilteredResources] = useState<any>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [resourceType, setResourceType] = useState("");
   const [sortBy, setSortBy] = useState("title");
 
   useEffect(() => {
-    const courseResources = resources.filter((r) => r.courseId === courseId);
+    const courseResources = resources.filter(
+      (r: any) => r.courseId === courseId
+    );
     setFilteredResources(courseResources);
   }, [courseId, resources]);
 
   useEffect(() => {
     let filtered = resources.filter(
-      (resource) =>
+      (resource: any) =>
         resource.courseId === courseId &&
         resource.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     if (resourceType) {
-      filtered = filtered.filter((resource) => resource.type === resourceType);
+      filtered = filtered.filter(
+        (resource: any) => resource.type === resourceType
+      );
     }
 
-    filtered.sort((a, b) => {
+    filtered.sort((a: any, b: any) => {
       if (sortBy === "title") {
         return a.title.localeCompare(b.title);
       } else if (sortBy === "date") {
-        return b.createdAt.getTime() - a.createdAt.getTime();
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
       }
       return 0;
     });
@@ -174,36 +130,89 @@ export default function CourseResourcesPage() {
     setFilteredResources(filtered);
   }, [searchTerm, resources, courseId, resourceType, sortBy]);
 
-  const handleAddResource = (newResource: any) => {
-    setResources([
-      ...resources,
-      {
-        ...newResource,
-        id: resources.length + 1,
-        createdAt: new Date(),
-        courseId,
-      },
-    ]);
+  useEffect(() => {
+    async function fetchResources() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/resource/${courseId}`
+      );
+      const data = await response.json();
+      setResources(data.data);
+    }
+    async function fetchCourse() {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/course/${courseId}`
+      );
+      const data = await response.json();
+      setCourse(data.data);
+    }
+    fetchCourse();
+    fetchResources();
+  }, [courseId]);
+  const handleAddResource = async (newResource: any) => {
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/resource`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `${localStorage.getItem("escalator_access_token")}`,
+          },
+          body: JSON.stringify(newResource),
+        }
+      );
+      const data = await response.json();
+      setResources([...resources, data.data]);
+    } catch (error) {
+      console.error("An error occurred", error);
+    }
   };
 
-  const handleEditResource = (updatedResource: any) => {
+  const handleEditResource = async (id: number, updatedResource: any) => {
+    try {
+      const response = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/resource/${id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: `${localStorage.getItem("escalator_access_token")}`,
+          },
+          body: JSON.stringify(updatedResource),
+        }
+      );
+      const data = await response.json();
+      setResources(
+        resources.map((resource: any) =>
+          resource.id === data.data.id ? data.data : resource
+        )
+      );
+    } catch (error) {
+      console.error("An error occurred", error);
+    }
+  };
+
+  const handleDeleteResource = async (resourceId: any) => {
+    try {
+      await fetch(
+        process.env.NEXT_PUBLIC_API_URL + `/api/v1/resource/${resourceId}`,
+        {
+          method: "DELETE",
+          headers: {
+            authorization: `${localStorage.getItem("escalator_access_token")}`,
+          },
+        }
+      );
+    } catch (error) {
+      console.log("An error occurred", error);
+    }
     setResources(
-      resources.map((resource) =>
-        resource.id === updatedResource.id ? updatedResource : resource
-      )
+      resources.filter((resource: any) => resource.id !== resourceId)
     );
   };
 
-  const handleDeleteResource = (resourceId: any) => {
-    setResources(resources.filter((resource) => resource.id !== resourceId));
-  };
-
-  if (!course) {
-    return <div>Course not found</div>;
-  }
-
   const resourceTypes = [
-    ...new Set(resources.map((resource) => resource.type)),
+    ...new Set(resources?.map((resource: any) => resource.type)),
   ];
 
   return (
@@ -214,8 +223,8 @@ export default function CourseResourcesPage() {
       >
         <ArrowLeft className="mr-2" /> Back to Courses
       </Link>
-      <h1 className="text-3xl font-bold mb-2">{course.code} Resources</h1>
-      <h2 className="text-xl text-gray-600 mb-6">{course.name}</h2>
+      <h1 className="text-3xl font-bold mb-2">{course?.code} Resources</h1>
+      <h2 className="text-xl text-gray-600 mb-6">{course?.title}</h2>
 
       <div className="flex flex-col md:flex-row gap-6">
         {/* Filters for larger screens */}
@@ -271,12 +280,12 @@ export default function CourseResourcesPage() {
                   </div>
                 </SheetContent>
               </Sheet>
-              <AddResourceForm onAdd={handleAddResource} courses={[course]} />
+              <AddResourceForm onAdd={handleAddResource} course={course} />
             </div>
           </div>
 
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filteredResources.map((resource) => (
+            {filteredResources.map((resource: any) => (
               <Card key={resource.id} className="flex flex-col">
                 <CardHeader>
                   <CardTitle className="flex justify-between items-center">
@@ -286,10 +295,10 @@ export default function CourseResourcesPage() {
                 </CardHeader>
                 <CardContent className="flex-grow">
                   <p className="text-sm text-muted-foreground mb-2">
-                    Author: {resource.author}
+                    Author: {resource.user.name}
                   </p>
                   <p className="text-sm text-muted-foreground mb-2">
-                    Added: {resource.createdAt.toLocaleDateString()}
+                    Added: {new Date(resource.createdAt).toLocaleDateString()}
                   </p>
                   {resource.url && (
                     <a

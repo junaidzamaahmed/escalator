@@ -62,7 +62,7 @@ const userSlice = createSlice({
   },
   extraReducers(builder) {
     builder.addCase(refreshAccessToken.fulfilled, (state, action) => {
-      if (!action.payload) {
+      if (!action.payload || action.payload.error != null) {
         return;
       }
       state.user = jwtDecode(action.payload.data.accessToken);
